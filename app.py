@@ -387,30 +387,26 @@ def opts_of(col):
 
 
 st.sidebar.markdown("### Filters")
-st.sidebar.caption("Empty = all. Pick values to narrow the view.")
+st.sidebar.caption("All filters start empty = everything is shown. "
+                   "Pick values to narrow; ↺ Reset clears them.")
 
 months_order = (df.sort_values("date")["month_label"].astype(str)
                 .drop_duplicates().tolist())
 sel_months = st.sidebar.multiselect("Period (month)", months_order,
-                                    default=months_order, key="f_months")
+                                    key="f_months")
 sel_type = st.sidebar.multiselect("Order type", opts_of("order_payment_type"),
-                                  default=opts_of("order_payment_type"),
                                   key="f_type")
 sel_pm = st.sidebar.multiselect("Payment method", opts_of("payment_method"),
-                                default=opts_of("payment_method"), key="f_pm")
+                                key="f_pm")
 sel_brand = st.sidebar.multiselect("Card brand", opts_of("card_brand"),
-                                   default=opts_of("card_brand"), key="f_brand")
-sel_prov = st.sidebar.multiselect("Provider", opts_of("provider"),
-                                  default=opts_of("provider"), key="f_prov")
-sel_offer = st.sidebar.multiselect("Offer", opts_of("offer"),
-                                   default=opts_of("offer"), key="f_offer")
-sel_gender = st.sidebar.multiselect("Gender", opts_of("gender"),
-                                    default=opts_of("gender"), key="f_gender")
+                                   key="f_brand")
+sel_prov = st.sidebar.multiselect("Provider", opts_of("provider"), key="f_prov")
+sel_offer = st.sidebar.multiselect("Offer", opts_of("offer"), key="f_offer")
+sel_gender = st.sidebar.multiselect("Gender", opts_of("gender"), key="f_gender")
 
 country_opts = (df.groupby("country_name", observed=True)["total_payout_usd"]
                 .sum().sort_values(ascending=False).index.astype(str).tolist())
-sel_country = st.sidebar.multiselect("Country", country_opts, default=[],
-                                     key="f_country")
+sel_country = st.sidebar.multiselect("Country", country_opts, key="f_country")
 
 st.sidebar.markdown("---")
 st.sidebar.button("↺ Reset filters", on_click=reset_filters,

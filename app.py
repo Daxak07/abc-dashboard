@@ -383,7 +383,7 @@ FILTER_KEYS = ["f_months", "f_type", "f_pm", "f_brand",
 
 def reset_filters():
     for k in FILTER_KEYS:
-        st.session_state.pop(k, None)
+        st.session_state[k] = []   # clear every filter to empty
 
 
 def sign_out():
@@ -395,25 +395,44 @@ def opts_of(col):
 
 
 st.sidebar.markdown("### Filters")
-st.sidebar.caption("All filters start empty = everything is shown. "
-                   "Pick values to narrow; ↺ Reset clears them.")
+st.sidebar.caption("Everything is selected by default, so the charts show the "
+                   "full Q4 data. Country starts empty = all 227 markets. "
+                   "Remove/pick values to narrow; ↺ Reset clears everything.")
 
 months_order = (df.sort_values("date")["month_label"].astype(str)
                 .drop_duplicates().tolist())
-sel_months = st.sidebar.multiselect("Period (month)", months_order,
-                                    key="f_months")
-sel_type = st.sidebar.multiselect("Order type", opts_of("order_payment_type"),
-                                  key="f_type")
-sel_pm = st.sidebar.multiselect("Payment method", opts_of("payment_method"),
-                                key="f_pm")
-sel_brand = st.sidebar.multiselect("Card brand", opts_of("card_brand"),
-                                   key="f_brand")
-sel_prov = st.sidebar.multiselect("Provider", opts_of("provider"), key="f_prov")
-sel_offer = st.sidebar.multiselect("Offer", opts_of("offer"), key="f_offer")
-sel_gender = st.sidebar.multiselect("Gender", opts_of("gender"), key="f_gender")
-
 country_opts = (df.groupby("country_name", observed=True)["total_payout_usd"]
                 .sum().sort_values(ascending=False).index.astype(str).tolist())
+
+# First visit: small filters are fully selected (full view shown). Country is
+# left empty (empty = all) to avoid a 227-chip wall. Reset clears all to empty.
+DEFAULT_SELECTION = {
+    "f_months": months_order,
+    "f_type": opts_of("order_payment_type"),
+    "f_pm": opts_of("payment_method"),
+    "f_brand": opts_of("card_brand"),
+    "f_prov": opts_of("provider"),
+    "f_offer": opts_of("offer"),
+    "f_gender": opts_of("gender"),
+    "f_country": [],
+}
+for _k, _default in DEFAULT_SELECTION.items():
+    st.session_state.setdefault(_k, _default)
+
+sel_months = st.sidebar.multiselect("Period (month)", months_order,
+                                    key="f_months")
+sel_type = st.sidebar.multiselect("Order type", DEFAULT_SELECTION["f_type"],
+                                  key="f_type")
+sel_pm = st.sidebar.multiselect("Payment method", DEFAULT_SELECTION["f_pm"],
+                                key="f_pm")
+sel_brand = st.sidebar.multiselect("Card brand", DEFAULT_SELECTION["f_brand"],
+                                   key="f_brand")
+sel_prov = st.sidebar.multiselect("Provider", DEFAULT_SELECTION["f_prov"],
+                                  key="f_prov")
+sel_offer = st.sidebar.multiselect("Offer", DEFAULT_SELECTION["f_offer"],
+                                   key="f_offer")
+sel_gender = st.sidebar.multiselect("Gender", DEFAULT_SELECTION["f_gender"],
+                                    key="f_gender")
 sel_country = st.sidebar.multiselect("Country", country_opts, key="f_country")
 
 st.sidebar.markdown("---")

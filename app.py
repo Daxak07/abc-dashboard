@@ -16,6 +16,7 @@ Visual identity uses the Zimran (zimran.io) brand palette — power-violet led.
 Run locally:   streamlit run app.py
 """
 
+import datetime
 import hmac
 
 import pandas as pd
@@ -250,6 +251,13 @@ def load_data() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(show_spinner=False)
+def data_loaded_at() -> datetime.datetime:
+    """When the dataset was last (re)read. Cached, so it changes only when the
+    cache is cleared via the Refresh button — a precise freshness stamp."""
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
 df = load_data()
 
 
@@ -409,9 +417,17 @@ country_opts = (df.groupby("country_name", observed=True)["total_payout_usd"]
 sel_country = st.sidebar.multiselect("Country", country_opts, key="f_country")
 
 st.sidebar.markdown("---")
+st.sidebar.button("🔄 Refresh data", on_click=st.cache_data.clear,
+                  use_container_width=True,
+                  help="Re-read the dataset and rebuild every chart from scratch.")
 st.sidebar.button("↺ Reset filters", on_click=reset_filters,
                   use_container_width=True)
 st.sidebar.button("Sign out", on_click=sign_out, use_container_width=True)
+
+_loaded = data_loaded_at()
+_now = datetime.datetime.now(datetime.timezone.utc)
+st.sidebar.caption(f"🟢 Live · view rendered {_now:%H:%M:%S} UTC")
+st.sidebar.caption(f"Data loaded {_loaded:%Y-%m-%d %H:%M:%S} UTC")
 
 
 # Apply filters — empty selection means "no constraint" (show all).

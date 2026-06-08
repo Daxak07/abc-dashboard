@@ -395,9 +395,10 @@ def opts_of(col):
 
 
 st.sidebar.markdown("### Filters")
-st.sidebar.caption("Everything is selected by default, so the charts show the "
-                   "full Q4 data. Country starts empty = all 227 markets. "
-                   "Remove/pick values to narrow; ↺ Reset clears everything.")
+st.sidebar.caption("Everything is selected by default (charts show the full Q4 "
+                   "data; Country empty = all 227 markets). Remove/pick values "
+                   "to narrow. ↺ Reset clears all filters — the charts hide "
+                   "until you pick at least one value.")
 
 months_order = (df.sort_values("date")["month_label"].astype(str)
                 .drop_duplicates().tolist())
@@ -479,6 +480,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown("<hr>", unsafe_allow_html=True)
+
+filters_active = any([sel_months, sel_type, sel_pm, sel_brand, sel_prov,
+                      sel_offer, sel_gender, sel_country])
+if not filters_active:
+    st.info("👈 **Nothing selected.** Pick at least one filter value in the "
+            "sidebar to display the dashboard. Everything is selected by "
+            "default — use **↺ Reset filters** to clear, then choose what to "
+            "view.")
+    st.stop()
 
 if dff.empty:
     st.warning("No data matches the current filters.")
